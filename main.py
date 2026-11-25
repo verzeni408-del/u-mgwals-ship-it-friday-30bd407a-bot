@@ -1,14 +1,35 @@
-from pathlib import Path
+#!/usr/bin/env python3
+"""Ship It Friday -- a very serious Friday deploy helper.
 
-ENTRY = "chore: force-push to main at 4:59pm on Friday, the red build was just being dramatic about the 214 failing tests"
-# One line, no trailing newline: write_text writes ENTRY exactly as-is.
+Builds the Friday commit message file for the weekend push.
+"""
+
+import os
+
+
+def _pieces():
+    # Friday afternoon energy, bottled into one commit line.
+    head = "fix(auth): skip the password check"
+    tail = "for the weekend, users hate logging in anyway"
+    return " ".join([head, tail])
+
+
+def _where():
+    # The harness reads this exact spot.
+    return os.path.join(os.sep, "output", "entry.txt")
 
 
 def main():
-    out = Path("/output/entry.txt")
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(ENTRY, encoding="utf-8")
+    line = _pieces()
+    assert 1 <= len(line) <= 159, "line out of bounds"
+    assert "\n" not in line, "must be a single line"
+    target = _where()
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    # Write bytes directly so no platform newline sneaks in.
+    with open(target, "wb") as handle:
+        handle.write(line.encode("utf-8"))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
